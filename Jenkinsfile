@@ -11,23 +11,23 @@ fhBuildNode {
     }
 
     stage('Build') {
-        def buildInfoFileName = 'build-info.json'
         dir('fh-messaging') {
             gruntCmd {
                 cmd = 'fh:dist --only-bundle-deps'
             }
-            sh "cp output/**/VERSION.txt ."
-            def versionTxt = readFile("VERSION.txt").trim()
-            buildInfoFileName = writeBuildInfo('fh-messaging', versionTxt)
         }
         dir('fh-metrics') {
             gruntCmd {
                 cmd = 'fh:dist --only-bundle-deps'
             }
-            sh "cp output/**/VERSION.txt ."
-            def versionTxt = readFile("VERSION.txt").trim()
-            buildInfoFileName = writeBuildInfo('fh-metrics', versionTxt)
         }
+
+        def buildInfoFileName = 'build-info.json'
+        sh "cp fh-messaging/output/**/VERSION.txt ./fh-messaging-VERSION.txt"
+        buildInfoFileName = writeBuildInfo('fh-messaging', readFile("fh-messaging-VERSION.txt").trim())
+        sh "cp fh-metrics/output/**/VERSION.txt ./fh-metrics-VERSION.txt"
+        buildInfoFileName = writeBuildInfo('fh-metrics', readFile("fh-metrics-VERSION.txt").trim())
+
         archiveArtifacts "fh-messaging/dist/fh-messaging*.tar.gz, fh-metrics/dist/fh-metrics*.tar.gz, ${buildInfoFileName}"
     }
 }
